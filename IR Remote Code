@@ -1,0 +1,79 @@
+#include <IRremote.h>
+int RECV_PIN = 7;
+int YELLOW = 10;
+int GREEN = 11;
+int RED = 12;
+int BLUE = 13;
+
+IRrecv irrecv(RECV_PIN);
+decode_results results;
+
+void setup() {
+  pinMode(RECV_PIN, INPUT);
+  pinMode(YELLOW, OUTPUT);
+  pinMode(GREEN, OUTPUT);
+  pinMode(RED, OUTPUT);
+  pinMode(BLUE, OUTPUT);
+  irrecv.enableIRIn();
+  Serial.begin(9600);
+}
+
+void loop() {
+  int i = 0;
+  if (irrecv.decode(&results)) {
+    translateIR();
+    unknownRemoter();
+    irrecv.resume();
+  }
+}
+
+void translateIR() {
+  switch (results.value) {
+    case LIGHT_OFF_BUTTON:
+      Serial.println("LED off");
+      digitalWrite(10, LOW);
+      digitalWrite(11, LOW);
+      digitalWrite(12, LOW);
+      digitalWrite(13, LOW);
+      break;
+    case YELLOW_ON:
+      Serial.println("Yellow LED on");
+      digitalWrite(10, HIGH);
+      break;
+    case GREEN_ON:
+      Serial.println("Green LED on");
+      digitalWrite(11, HIGH);
+      break;
+    case RED_ON:
+      Serial.println("Red LED on");
+      digitalWrite(12, HIGH);
+      break;
+    case BLUE_ON:
+      Serial.println("Blue LED on");
+      digitalWrite(13, HIGH);
+      break;
+
+    default:
+      Serial.print("Unknown button");
+      Serial.println(results.value, HEX);
+  }
+  delay(1000);
+}
+
+void unknownRemoter() {                   
+  long RED_OFF = red_off;
+  long RED_ON = red_on;
+  
+  if (results.value == RED_OFF) {
+    Serial.println ("Red LED off");
+    digitalWrite(12, LOW);
+  }
+  else if (results.value == RED_ON ) {
+    Serial.println ("Red LED on");
+    digitalWrite(12, HIGH);
+  }
+  else {
+    Serial.print("Still an unknown button");
+    Serial.println(results.value, HEX);
+  }
+}
